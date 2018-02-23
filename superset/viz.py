@@ -18,6 +18,7 @@ import logging
 import math
 import traceback
 import uuid
+import re
 
 from dateutil import relativedelta as rdelta
 from flask import escape, request
@@ -1330,6 +1331,45 @@ class HistogramViz(BaseViz):
     def get_data(self, df):
         """Returns the chart data"""
         chart_data = df[df.columns[0]].values.tolist()
+        return chart_data
+
+
+class Histogram_2Viz(BaseViz):
+
+    """Histogram 2"""
+
+    viz_type = 'histogram_2'
+    verbose_name = _('Histogram 2')
+    is_timeseries = False
+
+    def query_obj(self):
+        """Returns the query object for this visualization"""
+        d = super(Histogram_2Viz, self).query_obj()
+        d['row_limit'] = self.form_data.get(
+            'row_limit', int(config.get('VIZ_ROW_LIMIT')))
+        numeric_column = self.form_data.get('all_columns_x')
+        if numeric_column is None:
+            raise Exception(_('Must have one numeric column specified'))
+        self.columns = numeric_column
+        d['columns'] = numeric_column + self.groupby
+        d['groupby'] = []
+        return d
+
+    def get_data(self, df):
+        """Returns the chart data"""
+        chart_data = []
+        if len(self.groupby)>0:
+            groups = df.groupby(self.groupby)
+        else:
+            groups = [((), df)]
+        for group, data in groups:
+            if isinstance(group, str):
+                group = (group,)
+            group = (re.sub(r"\W+", r"_", g) for g in group)
+            chart_data.extend([{
+                 'key':"__".join([c, *group]), 
+                 'values': data[c].tolist()} 
+                for c in self.columns])
         return chart_data
 
 

@@ -1091,6 +1091,45 @@ export const visTypes = {
     },
   },
 
+  histogram_2: {
+    label: t('Histogram 2'),
+    controlPanelSections: [
+      {
+        label: t('Query'),
+        expanded: true,
+        controlSetRows: [
+          ['all_columns_x'],
+          ['row_limit'],
+          ['groupby'],
+        ],
+      },
+      {
+        label: t('Chart Options'),
+        controlSetRows: [
+          ['color_scheme'],
+          ['link_length'],
+          ['global_opacity']
+        ],
+      },
+    ],
+    controlOverrides: {
+      all_columns_x: {
+        label: t('Numeric Column'),
+        description: t('Select the numeric columns to use'),
+        multi: true,
+      },
+      link_length: {
+        type: 'TextControl',
+        label: t('No of Bins'),
+        description: t('Select number of bins for the histogram'),
+        default: 10,
+      },
+      global_opacity: {
+        isFloat: false
+      },
+    },
+  },
+
   sunburst: {
     label: t('Sunburst'),
     controlPanelSections: [
