@@ -28,11 +28,11 @@ function histogram(slice, payload) {
     const xAxis = d3.svg.axis()
     .scale(x)
     .orient('bottom')
-    .ticks(numTicks);
+    .ticks(numTicks, 's');
     const yAxis = d3.svg.axis()
     .scale(y)
     .orient('left')
-    .ticks(numTicks);
+    .ticks(numTicks, 's');
     // Calculate bins for the data
     let bins = d3.layout.histogram().bins(numBins)(data);
     if (normalized) {
