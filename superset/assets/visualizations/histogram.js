@@ -4,8 +4,14 @@ import { getColorFromScheme } from '../javascripts/modules/colors';
 require('./histogram.css');
 
 function histogram(slice, payload) {
+
+  const data = payload.data;
   const div = d3.select(slice.selector);
-  const draw = function (data, numBins, normalized, xAxisLabel) {
+  const numBins = Number(slice.formData.link_length) || 10;
+  const normalized = slice.formData.normalized;
+  const xAxisLabel = slice.formData.x_axis_label;
+
+  const draw = function () {
     // Set Margins
     const margin = {
       top: 50,
@@ -131,11 +137,8 @@ function histogram(slice, payload) {
     }
   };
 
-  const numBins = Number(slice.formData.link_length) || 10;
-  const normalized = slice.formData.normalized;
-  const xAxisLabel = slice.formData.x_axis_label;
   div.selectAll('*').remove();
-  draw(payload.data, numBins, normalized, xAxisLabel);
+  draw();
 }
 
 module.exports = histogram;
