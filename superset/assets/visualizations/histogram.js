@@ -28,23 +28,33 @@ function histogram(slice, payload) {
     const xAxis = d3.svg.axis()
     .scale(x)
     .orient('bottom')
-    .ticks(numTicks);
+    .ticks(numTicks, 's');
     const yAxis = d3.svg.axis()
     .scale(y)
     .orient('left')
-    .ticks(numTicks);
-    // Calculate bins for the data
-    let bins = d3.layout.histogram().bins(numBins)(data);
-    if (normalized) {
-      const total = data.length;
-      bins = bins.map(d => ({ ...d, y: d.y / total }));
-    }
+    .ticks(numTicks, 's');
 
     // Set the x-values
-    const max = d3.max(data);
-    const min = d3.min(data);
+    const max = d3.max(data, d => d3.max(d.values));
+    const min = d3.min(data, d => d3.min(d.values));
     x.domain([min, max])
     .range([0, width], 0.1);
+
+    // Calculate bins for the data
+    let bins = [];
+    data.forEach(d => {
+      let b = d3.layout.histogram().bins(numBins)(d.values);
+      const color = getColorFromScheme(d.key, slice.formData.color_scheme);
+      const w = d3.max([(x(b[0].dx) - x(0)) - 1, 0]);
+      const key = d.key;
+      // normalize if necessary
+      if (normalized) {
+        const total = d.values.length;
+        b = b.map(d => ({ ...d, y: d.y / total }));
+      }
+      bins = bins.concat(b.map(v => ({ ...v, color, width: w, key })));
+    });
+
     // Set the y-values
     y.domain([0, d3.max(bins, d => d.y)])
     .range([height, 0]);
@@ -79,11 +89,11 @@ function histogram(slice, payload) {
     bar.enter().append('rect');
     bar.exit().remove();
     // Set the Height and Width for each bar
-    bar.attr('width', (x(bins[0].dx) - x(0)) - 1)
+    bar.attr('width', d => d.width)
     .attr('x', d => x(d.x))
     .attr('y', d => y(d.y))
     .attr('height', d => y.range()[0] - y(d.y))
-    .style('fill', getColorFromScheme(1, slice.formData.color_scheme))
+    .style('fill', d => d.color)
     .order();
 
     // Update the x-axis

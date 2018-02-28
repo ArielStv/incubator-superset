@@ -1082,6 +1082,7 @@ export const visTypes = {
     ],
     controlOverrides: {
       all_columns_x: {
+        multi: true,
         label: t('Numeric Column'),
         description: t('Select the numeric column to draw the histogram'),
       },

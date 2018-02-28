@@ -1322,15 +1322,16 @@ class HistogramViz(BaseViz):
         d = super(HistogramViz, self).query_obj()
         d['row_limit'] = self.form_data.get(
             'row_limit', int(config.get('VIZ_ROW_LIMIT')))
-        numeric_column = self.form_data.get('all_columns_x')
-        if numeric_column is None:
-            raise Exception(_('Must have one numeric column specified'))
-        d['columns'] = [numeric_column]
+        numeric_columns = self.form_data.get('all_columns_x')
+        if numeric_columns is None:
+            raise Exception(_('Must have at least one numeric column specified'))
+        d['columns'] = numeric_columns
         return d
 
     def get_data(self, df):
         """Returns the chart data"""
-        chart_data = df[df.columns[0]].values.tolist()
+        chart_data = df.to_dict(orient="list")
+        chart_data = [{"key":k, "values":v} for k, v in chart_data.items()]
         return chart_data
 
 
