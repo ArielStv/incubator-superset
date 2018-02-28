@@ -34,6 +34,13 @@ function histogram(slice, payload) {
     .orient('left')
     .ticks(numTicks, 's');
 
+    // Calculate bins for the data
+    let bins = d3.layout.histogram().bins(numBins)(data);
+    if (normalized) {
+      const total = data.length;
+      bins = bins.map(d => ({ ...d, y: d.y / total }));
+    }
+
     // Set the x-values
     const max = d3.max(data, d => d3.max(d.values));
     const min = d3.min(data, d => d3.min(d.values));
