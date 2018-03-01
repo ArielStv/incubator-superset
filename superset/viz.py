@@ -19,6 +19,7 @@ import logging
 import math
 import traceback
 import uuid
+import re
 
 from dateutil import relativedelta as rdelta
 from flask import escape, request
@@ -1325,13 +1326,28 @@ class HistogramViz(BaseViz):
         numeric_columns = self.form_data.get('all_columns_x')
         if numeric_columns is None:
             raise Exception(_('Must have at least one numeric column specified'))
-        d['columns'] = numeric_columns
+        self.columns = numeric_columns
+        d['columns'] = numeric_columns + self.groupby
+        # override groupby entry to avoid aggregation
+        d['groupby'] = []
         return d
 
     def get_data(self, df):
         """Returns the chart data"""
-        chart_data = df.to_dict(orient="list")
-        chart_data = [{"key":k, "values":v} for k, v in chart_data.items()]
+        chart_data = []
+        if len(self.groupby) > 0:
+            groups = df.groupby(self.groupby)
+        else:
+            groups = [((), df)]
+        for keys, data in groups:
+            if isinstance(keys, str):
+                keys = (keys,)
+            # removing undesirable characters
+            keys = (re.sub(r'\W+', r'_', k) for k in keys)
+            chart_data.extend([{
+                'key': '__'.join([c, *keys]),
+                'values': data[c].tolist()}
+                for c in self.columns])
         return chart_data
 
 
